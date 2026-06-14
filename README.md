@@ -1,75 +1,131 @@
-[Discord Server Scraper](https://apify.com/cryptosignals/discord-server-scraper?fpr=data)
+[Discord Server Scraper](https://apify.com/magicfingers/discord-server-scraper?fpr=data)
 
-Find and analyze public Discord communities at scale — no bot tokens, no OAuth, no authentication required. This actor extracts structured data from Discord's public server discovery pages so you can research communities, analyze competitors, or build niche directories without writing a single line of scraping code.
+Scrapes publicly accessible Discord server information from multiple sources. No login or Discord account required.
 
-## Why this is hard to do yourself
+## What it does
 
-Discord's discovery surface looks simple in a browser, but pulling it programmatically is painful:
+This actor collects metadata from publicly listed Discord servers, including:
 
-- The official Discord API requires bot tokens and explicit server membership — useless for discovery.
-- The public discovery page is heavily client-rendered and rate-limited.
-- Pagination, category filters, and search behave differently than the visible UI suggests.
-- Building this in-house means maintaining yet another scraper that breaks every time Discord ships a redesign.
+- **Server name** and **description**
+- **Member count** and **online count**
+- **Categories** and **tags**
+- **Server icon**, **banner**, and **splash images**
+- **Boost level**, **verification level**
+- **Verified** and **partnered** status
+- **Invite code** and **vanity URL**
 
-This actor handles all of that for you. You give it a keyword, a category, or a list of invite codes — you get clean JSON back.
+## Data sources
 
-## Features
+| Source | Description |
+| --- | --- |
+| **Discord Discovery** | Official server discovery at discord.com/servers |
+| **Discord Invites** | Public invite pages (discord.gg/xxx) |
+| **Disboard.org** | Popular third-party server directory |
+| **Discord.me** | Third-party server listing site |
 
-- **No authentication required** — only public data Discord exposes to anonymous visitors.
-- **Search by keyword** — find servers about gaming, Python, crypto, anime, etc.
-- **Filter by category** — Gaming, Education, Music, Science & Tech, and more.
-- **Direct invite-code lookup** — paste a list of invites and get them resolved in bulk.
-- **Member counts and verification status** — for community-size benchmarking.
+## Input configuration
 
-## Input
+### Mode
+
+Choose which source(s) to scrape:
+
+- `discovery` — Discord's official server discovery (default)
+- `invite` — Scrape specific invite links you provide
+- `disboard` — Disboard.org server listings
+- `discordme` — Discord.me server listings
+- `all` — Scrape all sources
+
+### Search Keywords
+
+Comma-separated keywords to search for servers. Used in discovery, disboard, and discord.me modes.
+
+Example: `gaming, programming, crypto`
+
+### Categories
+
+Filter Discord discovery by category. Options include Gaming, Music, Entertainment, Science & Tech, Education, Programming, and more.
+
+### Invite Codes
+
+List of Discord invite codes or URLs to scrape. Accepts:
+
+- Plain codes: `python`
+- Short URLs: `discord.gg/python`
+- Full URLs: `https://discord.com/invite/python`
+
+### Max Results
+
+Maximum number of servers to collect per run. Default: 100. Set to 0 for unlimited.
+
+### Max Pages
+
+Maximum listing pages to scrape from Disboard and Discord.me. Default: 10.
+
+### Proxy Configuration
+
+Uses Apify Proxy by default. Recommended for avoiding rate limits.
+
+## Example input
 
 ```
 {
-  "keywords": "python",
-  "category": "science-and-tech",
-  "maxServers": 50,
-  "inviteCodes": [],
-  "proxyConfiguration": { "useApifyProxy": true }
+    "mode": "all",
+    "searchKeywords": "programming, python",
+    "categories": ["Programming", "Science & Tech"],
+    "inviteCodes": ["python", "discord.gg/reactjs", "https://discord.gg/typescript"],
+    "maxResults": 500,
+    "maxPages": 10,
+    "proxyConfiguration": {
+        "useApifyProxy": true
+    }
 }
 ```
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `keywords` | string | Search term (e.g. `gaming`, `python`, `crypto`). Leave empty to browse all. |
-| `category` | string | Optional category filter. One of `gaming`, `entertainment`, `education`, `science-and-tech`, `music`, `content-creator`, `anime-and-manga`, `movies-and-tv`. |
-| `maxServers` | integer | Max servers to return (1–500). |
-| `inviteCodes` | array | Optional list of invite codes/URLs (e.g. `python`, `https://discord.gg/gaming`). When set, discovery is skipped. |
-| `proxyConfiguration` | object | Proxy settings — recommended for larger runs. |
+## Output format
 
-## Output
-
-Each item in the dataset:
+Each result contains:
 
 ```
 {
-  "server_name": "Python",
-  "description": "The official Python community on Discord.",
-  "member_count": 412503,
-  "online_count": 18342,
-  "category": "Science & Tech",
-  "invite_url": "https://discord.gg/python",
-  "is_verified": true,
-  "boost_level": 3
+    "name": "Python",
+    "description": "The official Python community server.",
+    "id": "267624335836053506",
+    "memberCount": 350000,
+    "onlineCount": 45000,
+    "category": "Programming",
+    "tags": ["python", "coding", "programming"],
+    "iconUrl": "https://cdn.discordapp.com/icons/267624335836053506/abc123.png?size=256",
+    "bannerUrl": null,
+    "splashUrl": null,
+    "inviteCode": "python",
+    "inviteUrl": "https://discord.gg/python",
+    "boostLevel": 3,
+    "verificationLevel": 3,
+    "isVerified": true,
+    "isPartnered": true,
+    "vanityUrl": "https://discord.gg/python",
+    "source": "discord_discovery",
+    "scrapedAt": "2026-03-19T12:00:00.000Z"
 }
 ```
 
-## Use cases
+## Pricing
 
-- **Community research** — map the landscape of servers in your niche.
-- **Competitive analysis** — track member growth across rival communities.
-- **Lead lists** — find communities to partner with or sponsor.
-- **Directory building** — power a "best Discord servers for X" site.
-- **Academic research** — study online community structure at scale.
+This actor uses **Pay-Per-Event** pricing at **$1.00 per 1,000 results** ($0.001 per result).
 
-## Get started
+## Legal and ethical notes
 
-1. Click **Run** and try the default input.
-2. Adjust `keywords`, `category`, or `maxServers` for your use case.
-3. Export results to JSON, CSV, or Excel — or pipe them into your own pipeline via the Apify API.
+- This actor **only** scrapes publicly accessible server metadata
+- It does **not** access private channels, messages, or user data
+- It does **not** require Discord login or authentication
+- All data collected is already publicly visible on the web
+- Users are responsible for complying with Discord's Terms of Service and applicable laws
 
-Pay-per-result pricing — you only pay for servers actually returned.
+## Technical details
+
+- Built with **Apify SDK v3** and **Crawlee PlaywrightCrawler**
+- Uses Playwright with Chromium for JavaScript rendering
+- Includes anti-bot detection countermeasures (stealth mode, randomized delays)
+- Deduplicates results across sources by server ID
+- Handles Cloudflare challenges on third-party sites
+- Supports pagination with configurable limits
